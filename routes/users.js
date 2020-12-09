@@ -8,8 +8,8 @@ router.get("/", function (req, res, next) {
   let user = req.session.user
   console.log(user);
   productHelpers.getAllProducts().then((products) => {
-    res.render("users/view-products", { products, user});
-  });
+    res.render("users/view-products", {products, user});
+  })
 });
 router.get("/login", (req, res) => {
   res.render("users/login");
@@ -23,7 +23,7 @@ router.post("/signup", (req, res) => {
     res.redirect('/login')
   });
 });
-router.post("/login", (req, res) => {
+router.post("/login", (req,res) => {
   userHelpers.doLogin(req.body).then((response) => {
     if (response.status) {
      
@@ -38,6 +38,6 @@ router.post("/login", (req, res) => {
 });
 router.get('/logout',(req,res)=>{
   req.session.destroy()
-  req.redirect('/')
+  res.redirect("/")
 })
 module.exports = router;
