@@ -1,28 +1,43 @@
-var express = require('express');
-const { response } = require('../app');
+var express = require("express");
+const { response } = require("../app");
 var router = express.Router();
-var productHelpers = require('../helpers/product-helpers')
-const userHelpers=require('../helpers/user-helpers')
+var productHelpers = require("../helpers/product-helpers");
+const userHelpers = require("../helpers/user-helpers");
 /* GET home page. */
-router.get('/', function(req, res, next) {
-
-  productHelpers.getAllProducts().then((products)=>{
-    console.log(products);
-    res.render('users/view-products', {products})
-  })
+router.get("/", function (req, res, next) {
+  let user = req.session.user
+  console.log(user);
+  productHelpers.getAllProducts().then((products) => {
+    res.render("users/view-products", { products, user});
+  });
 });
-router.get('/login',(req,res)=>{
-  res.render('users/login')
-})
-router.get('/signup',(req,res)=>{
-  res.render('users/signup')
-})
-router.post('/signup',(req,res)=>{
-  userHelpers.doSignup(req.body).then((response)=>{
-    console.log(response)
-  })
-})
-router.post('/login',(req,res)=>{
-  userHelpers.doLogin(req.body)
+router.get("/login", (req, res) => {
+  res.render("users/login");
+});
+router.get("/signup", (req, res) => {
+  res.render("users/signup");
+});
+router.post("/signup", (req, res) => {
+  userHelpers.doSignup(req.body).then((response) => {
+    console.log("NEW USER CREATED",response);
+    res.redirect('/login')
+  });
+});
+router.post("/login", (req, res) => {
+  userHelpers.doLogin(req.body).then((response) => {
+    if (response.status) {
+     
+      req.session.loggedIn = true;
+      req.session.user = response.user;
+      res.redirect('/');
+      // console.log(req.session.user)
+    } else {
+      res.redirect("/login");
+    }
+  });
+});
+router.get('/logout',(req,res)=>{
+  req.session.destroy()
+  req.redirect('/')
 })
 module.exports = router;
