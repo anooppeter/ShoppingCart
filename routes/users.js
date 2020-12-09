@@ -12,7 +12,12 @@ router.get("/", function (req, res, next) {
   })
 });
 router.get("/login", (req, res) => {
-  res.render("users/login");
+  if(req.session.loggedIn){
+    res.redirect('/')
+  }else{
+  res.render("users/login",{"loginErr":req.session.loginErr});
+    req.session.loginErr = false
+}
 });
 router.get("/signup", (req, res) => {
   res.render("users/signup");
@@ -32,6 +37,7 @@ router.post("/login", (req,res) => {
       res.redirect('/');
       // console.log(req.session.user)
     } else {
+      req.session.loginErr ="Invalid Username Or Password"
       res.redirect("/login");
     }
   });
