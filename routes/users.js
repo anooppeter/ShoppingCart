@@ -3,60 +3,68 @@ const { response } = require("../app");
 var router = express.Router();
 var productHelpers = require("../helpers/product-helpers");
 const userHelpers = require("../helpers/user-helpers");
-const verifyLogin = (req,res,next)=>{
-  if(req.session.loggedIn){
-    next()
-  }else{
-    res.redirect('/login')
+const verifyLogin = (req, res, next) => {
+  if (req.session.loggedIn) {
+    next();
+  } else {
+    res.redirect("/login");
   }
-}
+};
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  let user = req.session.user
+  let user = req.session.user;
   console.log(user);
   productHelpers.getAllProducts().then((products) => {
-    res.render("users/view-products", {products, user});
-  })
+    res.render("users/view-products", { products, user });
+  });
 });
 router.get("/login", (req, res) => {
-  if(req.session.loggedIn){
-    res.redirect('/')
-  }else{
-  res.render("users/login",{"loginErr":req.session.loginErr});
-    req.session.loginErr = false
-}
+  if (req.session.loggedIn) {
+    res.redirect("/");
+  } else {
+    res.render("users/login", { loginErr: req.session.loginErr });
+    req.session.loginErr = false;
+  }
 });
 router.get("/signup", (req, res) => {
   res.render("users/signup");
 });
 router.post("/signup", (req, res) => {
   userHelpers.doSignup(req.body).then((response) => {
-    console.log("NEW USER CREATED",response);
-    res.redirect('/login')
+    //console.log("NEW USER CREATED", response);
+    req.session.loggedIn = true;
+    req.session.user = response;
+    res.redirect("/");
   });
 });
-router.post("/login", (req,res) => {
+router.post("/login", (req, res) => {
   userHelpers.doLogin(req.body).then((response) => {
     if (response.status) {
-     
       req.session.loggedIn = true;
       req.session.user = response.user;
-      res.redirect('/');
+      res.redirect("/");
       // console.log(req.session.user)
     } else {
-      req.session.loginErr ="Invalid Username Or Password"
+      req.session.loginErr = "Invalid Username Or Password";
       res.redirect("/login");
     }
   });
 });
-router.get('/logout',(req,res)=>{
-  req.session.destroy()
-  res.redirect("/")
+router.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/");
 });
-router.get('/cart',verifyLogin,(req,res)=>{
+router.get("/cart", verifyLogin, async(req, res) => {
+  let products =  await userHelpers.getCartProducts(req.session.user._id)
+  console.log(products)
   res.render("users/cart");
 });
-router.get('/orders',verifyLogin,(req,res)=>{
-  res.render("users/orders")
+router.get("/orders", verifyLogin, (req, res) => {
+  res.render("users/orders");
+});
+router.get('/add-to-cart/:id',verifyLogin, (req,res)=>{
+  userHelpers.addToCart(req.param.id,req.session.user._id).then(()=>{
+    res.redirect('/')
+  })
 })
 module.exports = router;
