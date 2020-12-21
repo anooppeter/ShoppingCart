@@ -9,7 +9,7 @@ module.exports = {
       .then((data) => {
         callback(data.ops[0]._id);
       });
-  },
+  },     
   getAllProducts: () => {
     return new Promise(async (resolve, reject) => {
       let products = await db
