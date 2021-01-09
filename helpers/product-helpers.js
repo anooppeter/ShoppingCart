@@ -3,6 +3,8 @@ var collection = require("../config/collections");
 var objectId = require('mongodb').ObjectID
 module.exports = {
   addProduct: (product, callback) => {
+    console.log(product)
+    product.Price = parseInt(product.Price)
     db.get()
       .collection("items")
       .insertOne(product)
@@ -43,7 +45,7 @@ module.exports = {
         $set:{
           Name:proDetails.Name,
           Catagory:proDetails.Catagory,
-          Price:proDetails.Price,
+          Price:parseInt(proDetails.Price),
           Description:proDetails.Description,
         }
       }).then((response)=>{
